@@ -221,3 +221,28 @@ UDP 0.0.0.0:2222 -> 1.1.1.1:53
 ```
 
 ## Customizing the Data sent and recieved
+
+There are 6 Callback functions that are called on specific events.
+- **ClientReceiveCallback**: Called when the Destination Server Responds with data for the Client (C<-S)
+- **ServerReceiveCallback**: Called when data is sent to the Desination Server from the Client. (C->S)
+- **ServerStartCallback**: Called when the Proxy Server Makes the connection to the desitnation server.
+- **ClientStartCallback**: Called when the Proxy Server Gets a Connection from the The origin of the request.
+- **ServerStartCallback**: Called when the Proxy Server Connection is closed.
+- **ClientStartCallback**: Called when the Client Connection is closed.
+
+An implimentation of the Callbacks are located in the *logger_callbacks.py* file in the *SocketLogger* Class. 
+These can change the information before the data is sent or recieved from the server. 
+
+**Setting the Callback Function:**
+```python
+logger = SocketLogger(args.log_folder, not args.quiet)
+forwarder.setClientReceiveCallback(logger.on_server2client_done_read)
+forwarder.setServerReceiveCallback(logger.on_client2server_done_read)
+forwarder.setClientStartCallback(logger.on_client2server_new_connection)
+forwarder.setServerStartCallback(logger.on_server2client_new_connection)
+forwarder.setClientCloseCallback(logger.on_client2server_close_connection)
+forwarder.setServerCloseCallback(logger.on_server2client_close_connection)
+```
+
+
+
