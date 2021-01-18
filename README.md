@@ -39,7 +39,86 @@ This makes it possoble to have a single proxy on a single port and foward it to 
 
 **SNI Proxy Example:**
 ```bash
+[gen0@gen0-test OmniProxy]$ sudo ./omniproxy.py -c ca.pem   --local-port 443 -d example.com:443
+Getting Server Certificate from example.com:443
+Cert already exists common_name=www.example.org
+TCP[SSL] 0.0.0.0:443 -> example.com:443
+#0: New Connection to destination <forwarder.SSLProxyServer object at 0x7f080ea639a0>
+Getting Server Certificate from example.com:443
+Cert already exists common_name=www.example.org
+#0: New Connection on local server <forwarder.SSLProxyClient object at 0x7f080ea79460>
+#1:C->S (75 bytes):
+GET / HTTP/1.1
+Host: example.com
+User-Agent: curl/7.74.0
+Accept: */*
 
+
+#1:C<-S (335 bytes):
+HTTP/1.1 200 OK
+Age: 534892
+Cache-Control: max-age=604800
+Content-Type: text/html; charset=UTF-8
+Date: Mon, 18 Jan 2021 19:57:15 GMT
+Etag: "3147526947+ident"
+Expires: Mon, 25 Jan 2021 19:57:15 GMT
+Last-Modified: Thu, 17 Oct 2019 07:18:26 GMT
+Server: ECS (nyb/1D1A)
+Vary: Accept-Encoding
+X-Cache: HIT
+Content-Length: 1256
+
+
+#1:C<-S (1256 bytes):
+<!doctype html>
+<html>
+<head>
+    <title>Example Domain</title>
+
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style type="text/css">
+    body {
+        background-color: #f0f0f2;
+        margin: 0;
+        padding: 0;
+        font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+        
+    }
+    div {
+        width: 600px;
+        margin: 5em auto;
+        padding: 2em;
+        background-color: #fdfdff;
+        border-radius: 0.5em;
+        box-shadow: 2px 3px 7px 2px rgba(0,0,0,0.02);
+    }
+    a:link, a:visited {
+        color: #38488f;
+        text-decoration: none;
+    }
+    @media (max-width: 700px) {
+        div {
+            margin: 0 auto;
+            width: auto;
+        }
+    }
+    </style>    
+</head>
+
+<body>
+<div>
+    <h1>Example Domain</h1>
+    <p>This domain is for use in illustrative examples in documents. You may use this
+    domain in literature without prior coordination or asking for permission.</p>
+    <p><a href="https://www.iana.org/domains/example">More information...</a></p>
+</div>
+</body>
+</html>
+
+#1: Server closed connection
+#1: Client closed connected
 ```
 
 ## TCP Proxy
