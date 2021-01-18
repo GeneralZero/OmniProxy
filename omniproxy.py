@@ -281,7 +281,7 @@ if __name__ == '__main__':
 	else:
 		# If using SSL Proxy a CA Certificate is Required
 		if not args.cafile:
-			raise Error("CA File Required")
+			raise Exception("CA File Required")
 
 		#Get CA File to sign new Certificates
 		CA = CertificateAuthority(args.cafile)
