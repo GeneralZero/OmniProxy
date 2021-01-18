@@ -77,13 +77,13 @@ class SocketLogger():
 			connection_dict['socket_protocol'] = 'udp'
 
 			#Set ProxyServer Source IP, PORT
-			connection_dict['server_src'] = (connection.proxyserver_srchost, connection.proxyserver_srcport)
+			connection_dict['server_src'] = (connection.server.proxyserver_srchost, connection.server.proxyserver_srcport)
 
 			#Set ProxyServer Destination IP, PORT
 			connection_dict['server_dst'] = (connection.server.listenhost, connection.server.listenport)
 
 			#Set ProxyClient Source IP, PORT
-			connection_dict['client_src'] = (connection.proxyclient_srchost, connection.proxyclient_dstport)
+			#connection_dict['client_src'] = (connection.proxyclient_srchost, connection.proxyclient_dstport)
 
 			#Set ProxyClient Destination IP, PORT
 			connection_dict['client_dst'] = (connection.server.client_dsthost, connection.server.client_dstport)
