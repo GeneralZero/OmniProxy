@@ -7,7 +7,7 @@ from twisted.internet import protocol
 from twisted.python import log
 import sys
 
-log.startLogging(sys.stdout)
+#log.startLogging(sys.stdout)
 
 ##Foward data from Proxy to => Remote Server
 class SSLProxyClient(protocol.Protocol):
@@ -34,7 +34,8 @@ class SSLProxyClient(protocol.Protocol):
 			self.server.transport.loseConnection()
 			self.server = None
 		elif self.noisy:
-			log.msg("Unable to connect to peer: {}".format(reason))
+			#log.msg("Unable to connect to peer: {}".format(reason))
+			pass
 
 	def setServer(self, server):
 		#log.msg("SSLProxy.setPeer")
@@ -79,7 +80,7 @@ class SSLProxyServer(protocol.Protocol):
 		#self.transport.pauseProducing()
 		self.dst_host, self.dst_port = connection.get_context().new_host
 
-		print("Setting Up Clients")
+		#print("Setting Up Clients")
 		#Setup Clients
 		self.client = self.clientProtocolFactory()
 		self.client.setServer(self)
@@ -101,7 +102,8 @@ class SSLProxyServer(protocol.Protocol):
 			self.client.transport.loseConnection()
 			self.client = None
 		elif self.noisy:
-			log.msg("Unable to connect to peer: {}".format(reason))
+			#log.msg("Unable to connect to peer: {}".format(reason))
+			pass
 
 	def setClient(self, client):
 		#log.msg("SSLProxyServer.setClient")
@@ -159,12 +161,11 @@ class UDPProxyServer(protocol.DatagramProtocol):
 		#log.msg("UDPProxyServer.datagramReceived: [{}]  {}".format(hostAndPort, data))
 
 		#Get Host Info
-		proxyserver_srchost, proxyserver_srcport = hostAndPort
-		socket_key = "{}:{}".format(proxyserver_srchost, proxyserver_srcport)
+		socket_key = "{}:{}".format(self.proxyserver_srchost, self.proxyserver_srcport)
 
 		#Inital Connection
 		if socket_key not in self.route_table:
-			proxyclient = UDPProxyClient(self, proxyserver_srchost, proxyserver_srcport, self.client_dsthost, self.client_dstport)
+			proxyclient = UDPProxyClient(self, self.proxyserver_srchost, self.proxyserver_srcport, self.client_dsthost, self.client_dstport)
 			self.route_table[socket_key] = proxyclient
 			#self.route_table[socket_key]
 			proxy_socket = reactor.listenUDP(0, proxyclient)
@@ -177,25 +178,25 @@ class UDPProxyServer(protocol.DatagramProtocol):
 
 #Creating inital Proxyies
 def tcpToTcp(localhost, localport, remotehost, remoteport):
-	log.msg("TCP on {}:{} forwarding to TCP {}:{}".format(localhost, localport, remotehost, remoteport))
+	#log.msg("TCP on {}:{} forwarding to TCP {}:{}".format(localhost, localport, remotehost, remoteport))
 	return reactor.listenTCP(localport, portforward.ProxyFactory(remotehost, remoteport), interface=localhost)
 
 def sslToTcp(localhost, localport, remotehost, remoteport, serverContextFactory):
-	log.msg("SSL on {}:{} forwarding to TCP {}:{}".format(localhost, localport, remotehost, remoteport))
+	#log.msg("SSL on {}:{} forwarding to TCP {}:{}".format(localhost, localport, remotehost, remoteport))
 	return reactor.listenSSL(localport, portforward.ProxyFactory(remotehost, remoteport), serverContextFactory, interface=localhost)
 
 
 def tcpToSSL(localhost, localport, remotehost, remoteport, clientContextFactory=ssl.ClientContextFactory()):
-	log.msg("TCP on {}:{} forwarding to SSL {}:{}".format(localhost, localport, remotehost, remoteport))
+	#log.msg("TCP on {}:{} forwarding to SSL {}:{}".format(localhost, localport, remotehost, remoteport))
 	return reactor.listenTCP(localport, SSLProxyFactory(clientContextFactory), interface=localhost)
 
 
 def sslToSSL(localhost, localport, remotehost, remoteport, CA, serverContextFactory, clientContextFactory=ssl.ClientContextFactory()):
-	log.msg("SSL on {}:{} forwarding to SSL {}:{}".format(localhost, localport, remotehost, remoteport))
+	#log.msg("SSL on {}:{} forwarding to SSL {}:{}".format(localhost, localport, remotehost, remoteport))
 	return reactor.listenSSL(localport, SSLProxyFactory(clientContextFactory), serverContextFactory, interface=localhost)
 
 def udpToUDP(localhost, localport, remotehost, remoteport):
-	log.msg("UDP on {}:{} forwarding to UDP {}:{}".format(localhost, localport, remotehost, remoteport))
+	#log.msg("UDP on {}:{} forwarding to UDP {}:{}".format(localhost, localport, remotehost, remoteport))
 	return reactor.listenUDP(localport, UDPProxyServer(localhost, localport, remotehost, remoteport), interface=localhost)
 
 
@@ -218,7 +219,7 @@ def setSSLServerReceiveCallback(callback):
 
 def setUDPServerReceiveCallback(callback):
 	def server_dataReceived(self, data, hostAndPort):
-		self.server_source = hostAndPort
+		self.proxyserver_srchost, self.proxyserver_srcport = hostAndPort
 		data = callback(self, data)
 		UDPProxyServer._datagramReceived(self, data, hostAndPort)
 
