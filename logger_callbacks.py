@@ -24,7 +24,6 @@ class SocketLogger():
 			os.makedirs(log_folder)
 
 	def common_info(self, connection):
-		print("Common Info: {}".format(connection))
 		connection_dict = {}
 
 		#If SSL
