@@ -7,12 +7,15 @@ from twisted.internet import protocol
 from twisted.python import log
 import sys
 
-#log.startLogging(sys.stdout)
+log.startLogging(sys.stdout)
 
 ##Foward data from Proxy to => Remote Server
 class SSLProxyClient(protocol.Protocol):
+	server = None
+	noisy = False
+
 	def connectionMade(self):
-		#log.msg("SSLProxyClient.connectionMade")
+		log.msg("SSLProxyClient.connectionMade")
 		self.server.setClient(self)
 		self.client = self
 		
@@ -24,12 +27,12 @@ class SSLProxyClient(protocol.Protocol):
 		self.server.transport.resumeProducing()
 
 	def dataReceived(self, data):
-		#log.msg("SSLProxyClient.dataReceived:")
+		log.msg("SSLProxyClient.dataReceived:")
 		if self.server is not None:
 			self.server.transport.write(data)
 	
 	def connectionLost(self, reason):
-		#log.msg("SSLProxyClient.connectionLost")
+		log.msg("SSLProxyClient.connectionLost")
 		if self.server is not None:
 			self.server.transport.loseConnection()
 			self.server = None
@@ -38,34 +41,39 @@ class SSLProxyClient(protocol.Protocol):
 			pass
 
 	def setServer(self, server):
-		#log.msg("SSLProxy.setPeer")
+		log.msg("SSLProxy.setPeer")
 		self.server = server
+		self.client = self
 
 class SSLProxyClientFactory(protocol.ClientFactory):
 	protocol = SSLProxyClient
 
-	def setServer(self, server):
-		#log.msg("SSLProxyClientFactory.setServer")
-		self.server = server
+	def __init__(self, server, *args, **kw):
+		log.msg("SSLProxyClientFactory.__init__")
+		super().__init__(*args, **kw)
+		self.server = server	
 
 	def buildProtocol(self, *args, **kw):
-		#log.msg("SSLProxyClientFactory.buildProtocol")
-		prot = protocol.ClientFactory.buildProtocol(self, *args, **kw)
+		log.msg("SSLProxyClientFactory.buildProtocol")
+		prot = super().buildProtocol(*args, **kw)
+		#print(self.server)
 		prot.setServer(self.server)
 		return prot
 
 	def clientConnectionFailed(self, connector, reason):
-		#log.msg("SSLProxyClientFactory.clientConnectionFailed")
+		log.msg("SSLProxyClientFactory.clientConnectionFailed")
 		self.server.transport.loseConnection()
 
 #Proxy Server Class
 class SSLProxyServer(protocol.Protocol):
 	clientProtocolFactory = SSLProxyClientFactory
 	reactor = None
+	noisy = False
 
 	def connectionMade(self):
-		#log.msg("SSLProxyServer.connectionMade")
+		log.msg("SSLProxyServer.connectionMade")
 		self.server = self
+		self.client = None
 
 		#Get Current SSL Context
 		ssl_context = self.transport._tlsConnection.get_context()
@@ -74,21 +82,13 @@ class SSLProxyServer(protocol.Protocol):
 		ssl_context._server_context = self
 
 	def SNICallback(self, connection):
-		#log.msg("SSLProxyServer.SNICallback: {}".format(connection))
-		#print(connection.get_context().new_host)
-
-		#self.transport.pauseProducing()
+		log.msg("SSLProxyServer.SNICallback: {}".format(connection))
 		self.dst_host, self.dst_port = connection.get_context().new_host
-
-		#print("Setting Up Clients")
-		#Setup Clients
-		self.client = self.clientProtocolFactory()
-		self.client.setServer(self)
 
 		if self.reactor is None:
 			self.reactor = reactor
 
-		self.reactor.connectSSL(self.dst_host, self.dst_port, self.client, self.factory.clientContextFactory)
+		self.reactor.connectSSL(self.dst_host, self.dst_port, self.clientProtocolFactory(self), self.factory.clientContextFactory)
 
 	#Client -> Proxy
 	def dataReceived(self, data):
@@ -108,6 +108,7 @@ class SSLProxyServer(protocol.Protocol):
 	def setClient(self, client):
 		#log.msg("SSLProxyServer.setClient")
 		self.client = client
+		self.server = self
 
 
 class SSLProxyFactory(protocol.Factory):
@@ -117,6 +118,10 @@ class SSLProxyFactory(protocol.Factory):
 	def __init__(self, clientContextFactory):
 		#log.msg("SSLProxyFactory.__init__")
 		self.clientContextFactory = clientContextFactory
+
+	def setClient(self, client):
+		#log.msg("SSLProxyServer.setClient")
+		self.client = client
 
 
 class UDPProxyClient(protocol.DatagramProtocol):
