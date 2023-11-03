@@ -3,8 +3,8 @@ A TCP, UDP and SSL Proxy supporting SNI.
 
 ## Installing
 
-
 ```bash
+>>> pip install pyOpenSSL
 >>> pip install twisted
 >>> ./omniproxy.py -h
 usage: omniproxy.py [-h] [--local-port <port>] --destination <destination> [--listen-address <listen-address>]
@@ -26,6 +26,15 @@ optional arguments:
   --log-folder LOG_FOLDER
   --quiet, -q
 ```
+
+#### Converting Burp Certs
+
+1. Export your Burp Certificate
+  - Export with the **Certificate in DER format** option
+2. Export your Burp Private key
+  - Export with the **Private Key in DER format** option
+3. Use the **./burp2omni.sh** script
+  - This Converts both the Private Key and Certifate from the binary DER format to the base64 PEM format. Then merges them into a single file.
 
 ## SNI Proxy
 
