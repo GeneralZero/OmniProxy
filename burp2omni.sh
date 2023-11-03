@@ -3,7 +3,7 @@
 set -e
 
 if [ "$#" -ne 2 ]; then
-    echo "Useage: $0 <Burp_DER_Certificate> <Burp_DER_Private_key>"
+    echo "Usage: $0 <Burp_DER_Certificate> <Burp_DER_Private_key>"
     exit 1
 fi
 
@@ -17,4 +17,4 @@ openssl x509 -in $1 -inform der -out ca_crt.pem
 cat ca_key.pem ca_crt.pem > ca.pem
 
 echo "Cert and Key are converted."
-echo "Can now be used with  -c ca.pem "
+echo "Can now be used with \"-c ca.pem\" "
