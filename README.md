@@ -6,6 +6,7 @@ A TCP, UDP and SSL Proxy supporting SNI.
 ```bash
 >>> pip install pyOpenSSL
 >>> pip install twisted
+>>> pip install cryptography
 >>> ./omniproxy.py -h
 usage: omniproxy.py [-h] [--local-port <port>] --destination <destination> [--listen-address <listen-address>]
                     [--tcp] [--udp] [--cafile <certificate-file>] [--log-folder LOG_FOLDER] [--quiet]
